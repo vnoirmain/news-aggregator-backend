@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Http;
 
 class NewsController extends Controller
 {
-    public function fetchNews(Request $request) {
+    public function fetchNews(Request $request)
+    {
         $request->validate([
             'date' => 'sometimes|date',
             'category' => 'sometimes|string',
@@ -20,7 +21,7 @@ class NewsController extends Controller
         // Get the authenticated user
         $user = $request->user();
         $preferences = $user->preferences;
-        
+
         // Get or create the user's preferences with a default source of 'newsapi'
         $selectedSource = $request->input('source', $preferences->source ?? 'newsapi');
         $category = $request->input('category', $preferences->category);
@@ -47,6 +48,7 @@ class NewsController extends Controller
                     'api-key' => $apiKey,
                     'section' => $category,
                     'q' => $keyword,
+                    'show-fields' => "thumbnail"
                 ];
                 break;
 
