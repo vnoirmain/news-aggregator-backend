@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Classes\NewsTransformer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -48,7 +49,8 @@ class NewsController extends Controller
                     'api-key' => $apiKey,
                     'section' => $category,
                     'q' => $keyword,
-                    'show-fields' => "thumbnail"
+                    'show-fields' => "thumbnail",
+                    'page-size' => '20'
                 ];
                 break;
 
@@ -72,7 +74,8 @@ class NewsController extends Controller
         // Check if the request was successful
         if ($response->successful()) {
             $news = $response->json();
-            return response()->json(['news' => $news]);
+            $transformedResponse = NewsTransformer::transform($news, $selectedSource);
+            return response()->json(['news' => $transformedResponse]);
         }
 
         // Handle the case where the request was not successful
