@@ -22,10 +22,11 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::get('/categories', [UserPreferencesController::class, 'getCategoriesBySource']);
 
-Route::middleware('auth:api')->group(function() {
+Route::get('/news', [NewsController::class, 'fetchNews']);
+
+Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
     Route::post('/preferences', [UserPreferencesController::class, 'updatePreferences']);
-    Route::get('/news', [NewsController::class, 'fetchNews']);
 });

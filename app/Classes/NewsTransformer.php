@@ -31,8 +31,7 @@ class NewsTransformer
               'content' => $article['lead_paragraph'] ?? '',
               'author' => $article['author'] ?? '',
               'webUrl' => $article['uri'] ?? '',
-              'thumbnail' => is_array($article['multimedia']) ? isset($article['multimedia'][0]) ? 'https://nytimes.com/' . $article['multimedia'][0]['url']
-                : '' : '',
+              'thumbnail' =>  is_array($article['multimedia']) && isset($article['multimedia'][0]['url']) ? 'https://nytimes.com/' . $article['multimedia'][0]['url'] : '',
               'publishedAt' => $article['publishedAt'] ?? ''
             ];
           }, $apiResponse['response']['docs']);
@@ -49,7 +48,7 @@ class NewsTransformer
               'author' => $article['author'] ?? '',
               'webUrl' => $article['webUrl'] ?? '',
               'thumbnail' => isset($article['fields']) ? $article['fields']['thumbnail'] : '',
-              'publishedAt' => $article['publishedAt'] ?? ''
+              'publishedAt' => $article['webPublicationDate'] ?? ''
             ];
           }, $apiResponse['response']['results']);
         }

@@ -6,6 +6,7 @@ use App\Classes\NewsTransformer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use stdClass;
 
 class NewsController extends Controller
 {
@@ -17,18 +18,22 @@ class NewsController extends Controller
             'author' => 'sometimes|string',
             'source' => 'sometimes|in:newsapi,guardian,nytimes',
             'keyword' => 'sometimes|string',
+            'offset' => 'sometimes|string',
+            'limit' => 'sometimes|string'
         ]);
 
         // Get the authenticated user
         $user = $request->user();
-        $preferences = $user->preferences;
+        $preferences = isset($user) ? $user->preferences : new stdClass();
 
         // Get or create the user's preferences with a default source of 'newsapi'
         $selectedSource = $request->input('source', $preferences->source ?? 'newsapi');
-        $category = $request->input('category', $preferences->category);
-        $author = $request->input('author', $preferences->author);
+        $category = $request->input('category', $preferences->category ?? '');
+        $author = $request->input('author', $preferences->author ?? '');
         $keyword = $request->input('keyword');
         $date = $request->input('date');
+        $offset = $request->input('offset') ?? 0;
+        $limit = $request->input('limit') ?? 24;
 
         // Customize the API endpoint based on the selected source
         switch ($selectedSource) {
@@ -39,6 +44,8 @@ class NewsController extends Controller
                     'apiKey' => $apiKey,
                     'category' => $category,
                     'q' => $keyword,
+                    'page' => floor($offset / $limit) + 1,
+                    'pageSize' => $limit,
                 ];
                 break;
 
@@ -50,7 +57,8 @@ class NewsController extends Controller
                     'section' => $category,
                     'q' => $keyword,
                     'show-fields' => "thumbnail",
-                    'page-size' => '20'
+                    'page' => floor($offset / $limit) + 1,
+                    'page-size' => $limit
                 ];
                 break;
 
@@ -61,6 +69,7 @@ class NewsController extends Controller
                     'api-key' => $apiKey,
                     'fq' => "section_name:\"{$category}\"",
                     'q' => $keyword,
+                    'page' => floor($offset / $limit) + 1
                 ];
                 break;
 
