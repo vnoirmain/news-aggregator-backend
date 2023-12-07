@@ -27,10 +27,10 @@ class NewsController extends Controller
         $preferences = isset($user) ? $user->preferences : new stdClass();
 
         // Get or create the user's preferences with a default source of 'newsapi'
-        $selectedSource = $request->input('source', $preferences->source ?? 'newsapi');
+        $selectedSource = $request->input('source', $preferences->source ?? 'guardian');
         $category = $request->input('category', $preferences->category ?? '');
         $author = $request->input('author', $preferences->author ?? '');
-        $keyword = $request->input('keyword');
+        $keyword = $request->input('keyword') ?? '';
         $date = $request->input('date');
         $offset = $request->input('offset') ?? 0;
         $limit = $request->input('limit') ?? 24;
@@ -42,11 +42,16 @@ class NewsController extends Controller
                 $apiKey = config('services.newsapi.api_key');
                 $queryParams = [
                     'apiKey' => $apiKey,
-                    'category' => $category,
                     'q' => $keyword,
                     'page' => floor($offset / $limit) + 1,
                     'pageSize' => $limit,
                 ];
+
+                if (!empty($category)) {
+                    echo 'sdf';
+                    $queryParams['category'] = $category;
+                }
+
                 break;
 
             case 'guardian':
@@ -54,12 +59,15 @@ class NewsController extends Controller
                 $apiKey = config('services.guardian.api_key');
                 $queryParams = [
                     'api-key' => $apiKey,
-                    'section' => $category,
                     'q' => $keyword,
                     'show-fields' => "thumbnail",
                     'page' => floor($offset / $limit) + 1,
                     'page-size' => $limit
                 ];
+
+                if (!empty($category)) {
+                    $queryParams['section'] = $category;
+                }
                 break;
 
             case 'nytimes':
@@ -67,10 +75,14 @@ class NewsController extends Controller
                 $apiKey = config('services.nytimes.api_key');
                 $queryParams = [
                     'api-key' => $apiKey,
-                    'fq' => "section_name:\"{$category}\"",
                     'q' => $keyword,
                     'page' => floor($offset / $limit) + 1
                 ];
+
+                if (!empty($category)) {
+                    $queryParams['fq'] = "section_name:\"{$category}\"";
+                }
+
                 break;
 
             default:
@@ -88,6 +100,6 @@ class NewsController extends Controller
         }
 
         // Handle the case where the request was not successful
-        return response()->json(['error' => 'Failed to fetch news'], 500);
+        return response()->json(['error' => 'Failed to fetch news', 'queryParams' => $queryParams], 500);
     }
 }
