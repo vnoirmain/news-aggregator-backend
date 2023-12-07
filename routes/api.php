@@ -22,7 +22,7 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::get('/categories', [UserPreferencesController::class, 'getCategoriesBySource']);
 
-Route::get('/news', [NewsController::class, 'fetchNews']);
+Route::get('/news', [NewsController::class, 'fetchNews'])->middleware('optionalauth:api');
 
 Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Classes\NewsTransformer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use stdClass;
 
@@ -23,7 +24,12 @@ class NewsController extends Controller
         ]);
 
         // Get the authenticated user
-        $user = $request->user();
+        if (Auth::check() || Auth::user()) {
+            $user = Auth::user();
+        } else {
+            $user = null;
+        }
+
         $preferences = isset($user) ? $user->preferences : new stdClass();
 
         // Get or create the user's preferences with a default source of 'newsapi'
